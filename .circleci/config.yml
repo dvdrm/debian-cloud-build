@@ -56,8 +56,34 @@ jobs:
       - store_artifacts:
           path: debian-12-custom.qcow2
           destination: debian-12-custom.qcow2
+jobs:
+  upload-to-release:
+    machine: true
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: 安装 GitHub CLI
+          command: |
+            sudo apt update
+            sudo apt install -y gh
+
+      - run:
+          name: 上传到 GitHub Release
+          command: |
+            TAG_NAME="${CIRCLE_TAG:-manual-$(date +%s)}"
+            gh release create "$TAG_NAME" debian-12-custom.qcow2 --title "Custom Debian Image $TAG_NAME" --notes "自动发布"
+        env:
+          GITHUB_TOKEN: $GH_TOKEN
 
 workflows:
   build_and_release:
+    triggers:
+      - type: tag
+        pattern: "v*"
     jobs:
       - build-debian-cloud
+      - upload-to-release:
+          requires:
+            - build-debian-cloud
+
