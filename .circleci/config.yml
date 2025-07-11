@@ -66,17 +66,19 @@ jobs:
             sudo apt install -y gh
 
       - run:
-          name: 上传到 GitHub Release
+          name: 上传到 GitHub Release（简化）
           command: |
             export GITHUB_TOKEN=$GH_TOKEN
             TAG_NAME="${CIRCLE_TAG:-manual-$(date +%s)}"
             echo "上传到 Release: $TAG_NAME"
+
             ls -lh debian-12-custom.qcow2 || (echo "文件不存在" && exit 1)
+
             gh release create "$TAG_NAME" debian-12-custom.qcow2 \
               --title "Debian Cloud Image $TAG_NAME" \
               --notes "自动发布自定义镜像" \
               --generate-notes \
-              --verbose
+              --clobber
 
 workflows:
   build_and_release:
