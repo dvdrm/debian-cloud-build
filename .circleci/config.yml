@@ -53,6 +53,10 @@ jobs:
           paths:
             - debian-12-custom.qcow2
 
+      - store_artifacts:
+          path: debian-12-custom.qcow2
+          destination: debian-12-custom.qcow2
+
 workflows:
   build_and_release:
     jobs:
