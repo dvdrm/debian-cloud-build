@@ -1,0 +1,60 @@
+version: 2.1
+
+jobs:
+  build-debian-cloud:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+
+      - run:
+          name: 安装工具
+          command: |
+            sudo apt update
+            sudo apt install -y libguestfs-tools axel qemu-utils
+
+      - run:
+          name: 下载 Debian Cloud Image
+          command: |
+            axel -n 8 -o debian-12.qcow2 https://cdimage.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2
+
+      - run:
+          name: 解锁内核（仅限 CI 使用）
+          command: |
+            sudo dpkg-statoverride --update --add root root 0644 /boot/vmlinuz-$(uname -r)
+
+      - run:
+          name: 定制镜像
+          command: |
+            virt-customize -a debian-12.qcow2 \
+              --smp 2 \
+              --timezone Asia/Hong_Kong \
+              --append-line "/etc/default/grub:# disables OS prober to avoid loopback detection which breaks booting" \
+              --append-line "/etc/default/grub:GRUB_DISABLE_OS_PROBER=true" \
+              --run-command "update-grub" \
+              --run-command "systemctl enable serial-getty@ttyS1.service" \
+              --run-command "sed -i 's|Types: deb deb-src|Types: deb|g' /etc/apt/sources.list.d/debian.sources" \
+              --run-command "sed -i 's|generate_mirrorlists: true|generate_mirrorlists: false|g' /etc/cloud/cloud.cfg.d/01_debian_cloud.cfg" \
+              --update \
+              --install "sudo,qemu-guest-agent,spice-vdagent,bash-completion,unzip,wget,curl,axel,net-tools,iputils-ping,iputils-arping,iputils-tracepath,nano,most,screen,less,vim,bzip2,lldpd,mtr-tiny,htop,dnsutils,zstd" \
+              --run-command "apt-get -y autoremove --purge && apt-get -y clean" \
+              --append-line "/etc/systemd/timesyncd.conf:NTP=time.apple.com time.windows.com" \
+              --delete "/var/log/*.log" \
+              --delete "/var/lib/apt/lists/*" \
+              --delete "/var/cache/apt/*" \
+              --truncate "/etc/machine-id"
+
+      - run:
+          name: 压缩镜像
+          command: |
+            virt-sparsify --compress debian-12.qcow2 debian-12-custom.qcow2
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - debian-12-custom.qcow2
+
+workflows:
+  build_and_release:
+    jobs:
+      - build-debian-cloud
