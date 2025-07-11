@@ -80,11 +80,18 @@ jobs:
 
 workflows:
   build_and_release:
-    triggers:
-      - type: tag
-        pattern: "v*"
     jobs:
-      - build-debian-cloud
+      - build-debian-cloud:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - upload-to-release:
           requires:
             - build-debian-cloud
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
