@@ -2,8 +2,7 @@ version: 2.1
 
 jobs:
   build-debian-cloud:
-    docker:
-      - image: cimg/base:stable
+    machine: true
     steps:
       - checkout
 
