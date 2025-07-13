@@ -1,4 +1,4 @@
-# 🇩🇪 Debian Cloud Image Builder for Proxmox VE
+#  Debian Cloud Image Builder for Proxmox VE
 
 本项目使用 [CircleCI](https://circleci.com/) 自动构建适用于 Proxmox VE 的自定义 [Debian 12 Cloud Image](https://cdimage.debian.org/images/cloud/bookworm/latest/)，并自动上传至 GitHub Release。
 
@@ -25,11 +25,6 @@ This project uses [CircleCI](https://circleci.com/) to automatically build a cus
 ```bash
 wget https://github.com/xixi-zhao/debian-cloud-build/releases/download/latest/debian-12-custom.qcow2
 ```
-
-（请确保你在 GitHub Release 页面中打了一个 tag 叫 `latest`）
-
-*(Make sure to maintain a tag named `latest` on GitHub Releases.)*
-
 ---
 
 ## 💻 导入到 Proxmox VE | Import into Proxmox VE
