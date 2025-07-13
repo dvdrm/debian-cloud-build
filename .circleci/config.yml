@@ -73,7 +73,7 @@ jobs:
               sudo apt install gh -y
 
       - run:
-          name: 上传到 GitHub Release（稳定版）
+          name: 上传到 GitHub Release（最终版）
           command: |
             export GITHUB_TOKEN=$GH_TOKEN
             TAG_NAME="${CIRCLE_TAG:-manual-$(date +%s)}"
@@ -88,8 +88,9 @@ jobs:
                 --notes "自动发布自定义镜像"
             fi
 
-            # 上传镜像文件
-            gh release upload "$TAG_NAME" debian-12-custom.qcow2 --clobber --verbose
+            # 上传镜像文件（去掉 --verbose）
+            gh release upload "$TAG_NAME" debian-12-custom.qcow2 --clobber
+
 
 
 
