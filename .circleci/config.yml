@@ -61,10 +61,16 @@ jobs:
           at: .
 
       - run:
-          name: 安装 GitHub CLI
+          name: 安装最新版 GitHub CLI
           command: |
-            sudo apt update
-            sudo apt install -y gh
+            type -p curl >/dev/null || sudo apt install curl -y
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+              sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+              sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+              sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+              sudo apt update && \
+              sudo apt install gh -y
 
       - run:
           name: 上传到 GitHub Release（稳定版）
@@ -73,7 +79,7 @@ jobs:
             TAG_NAME="${CIRCLE_TAG:-manual-$(date +%s)}"
             echo "上传到 Release: $TAG_NAME"
 
-            ls -lh debian-12-custom.qcow2 || (echo "文件不存在" && exit 1)
+            ls -lh debian-12-custom.qcow2 || (echo "镜像文件不存在" && exit 1)
 
             # 如果 Release 不存在，则创建
             if ! gh release view "$TAG_NAME" > /dev/null 2>&1; then
@@ -84,6 +90,7 @@ jobs:
 
             # 上传镜像文件
             gh release upload "$TAG_NAME" debian-12-custom.qcow2 --clobber --verbose
+
 
 
 
