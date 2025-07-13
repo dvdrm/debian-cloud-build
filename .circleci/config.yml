@@ -88,9 +88,12 @@ jobs:
                 --notes "自动发布自定义镜像"
             fi
 
-            # 上传镜像文件（去掉 --verbose）
+            # 上传镜像文件
             gh release upload "$TAG_NAME" debian-12-custom.qcow2 --clobber
-
+      - run:
+          name: 同步镜像到 latest Release
+          command: |
+            gh release upload latest debian-12-custom.qcow2 --clobber || echo "latest 不存在，跳过上传"
 
 
 
