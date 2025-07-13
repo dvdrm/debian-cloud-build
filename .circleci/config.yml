@@ -77,8 +77,9 @@ jobs:
             gh release create "$TAG_NAME" debian-12-custom.qcow2 \
               --title "Debian Cloud Image $TAG_NAME" \
               --notes "自动发布自定义镜像" \
-              --generate-notes \
-              --clobber
+              --generate-notes || \
+            gh release upload "$TAG_NAME" debian-12-custom.qcow2 --clobber
+
 
 workflows:
   build_and_release:
